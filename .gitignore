@@ -1,0 +1,14 @@
+seed/about-me.private.md
+seed/*.private.*
+*.aiheart
+DerivedData/
+.build/
+xcuserdata/
+.DS_Store
+build/
+AiHeart.xcodeproj/
+seed/*
+!seed/about-me.example.md
+
+# Personal Apple team ID
+Config/Local.xcconfig
