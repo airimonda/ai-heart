@@ -154,6 +154,8 @@ import Testing
         #expect(HonestAffirmations.parseLine(row(line, cites: "3"), sentences: s, text: s.joined(separator: " ")) == nil)
         #expect(!HonestAffirmations.mayWrite(for: s.joined(separator: " ")))
         #expect(HonestAffirmations.mayWrite(for: Self.entry))
+        // One hopeless-sounding sentence no longer blocks the whole entry; it just can't be cited.
+        #expect(HonestAffirmations.mayWrite(for: s[0] + " " + s[2]))
         // The prompt never shows the model those sentences.
         let p = HonestAffirmations.prompt(sentences: s, labels: [:], note: ReleaseNote())
         #expect(p.contains("sister") && !p.contains("ending my life") && !p.contains("no point"))

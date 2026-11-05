@@ -239,6 +239,8 @@ extension HonestAffirmations {
 
     /// Entries that read as heavy or hopeless, or mention self-harm, get no written lines (the fixed heavy card shows).
     public static func mayWrite(for text: String) -> Bool {
-        !SafetyCheck.mentionsSelfHarm(text) && !KeepOrRelease.readsHopeless(text)
+        // Owner, 2026-11-05: long entries with one hopeless-sounding sentence got nothing at all. Now only self-harm
+        // blocks the whole entry; hopeless sentences are left out of the prompt and can never be cited.
+        !SafetyCheck.mentionsSelfHarm(text)
     }
 }
