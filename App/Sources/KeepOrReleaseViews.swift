@@ -288,6 +288,8 @@ struct ReleaseNoteCard: View {
                     .font(.caption).foregroundStyle(Palette.muted).fixedSize(horizontal: false, vertical: true)
             }
             let honest = HonestAffirmations.shown(note)
+            let _ = NSLog("AiHeartCard: v=%d summaryOnly=%d written=%d shown=%d", note.version, note.summaryOnly == true ? 1 : 0,
+                          note.affirmations?.count ?? -1, honest.count)
             if !honest.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
                     label("Honest things to hold")
@@ -799,7 +801,9 @@ struct RestingEntryView: View {
                             writing = true
                             Task {
                                 let note = await ReleaseNoteWriter.make(for: entry, keptLines: entry.keptLines, context: context)
+                                NSLog("AiHeartRewrite: status=%@ made=%d aff=%d", entry.statusRaw, note == nil ? 0 : 1, note?.affirmations?.count ?? -1)
                                 if entry.status == .resting, let note { entry.releaseNote = note; entry.updatedAt = .now; try? context.save() }
+                                NSLog("AiHeartRewrite: stored aff=%d", entry.releaseNote?.affirmations?.count ?? -1)
                                 writing = false
                             }
                         } label: {
