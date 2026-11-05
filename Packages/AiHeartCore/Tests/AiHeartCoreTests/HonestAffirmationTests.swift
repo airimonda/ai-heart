@@ -170,12 +170,13 @@ import Testing
         #expect(HonestAffirmations.shown(n).first?.text.contains("want") == true)
     }
 
-    @Test func letGoSummaryDropsThem() {
+    @Test func letGoSummaryDropsHerWords() {
         var n = ReleaseNote()
         n.parts = [NotePart.want.rawValue: ["[synthetic] I want to rest."]]
         n.affirmations = [WrittenAffirmation(text: "You named rest.", basis: "b", anchors: ["[synthetic] I want to rest."])]
         #expect(n.allText.contains("You named rest."))
-        #expect(n.summary.affirmations == nil && n.summary.summaryOnly == true)
+        #expect(n.summary.affirmations?.first?.anchors.isEmpty == true && n.summary.summaryOnly == true)
+        #expect(n.summary.parts == nil)
     }
 
     @Test func oldNotesDecodeAndNewOnesRoundTrip() throws {
@@ -184,5 +185,32 @@ import Testing
         var n = ReleaseNote()
         n.affirmations = [WrittenAffirmation(text: "t", basis: "b", anchors: ["a"])]
         #expect(ReleaseNote.decode(n.encoded())?.affirmations == n.affirmations)
+    }
+}
+
+@Suite struct LetGoAffirmationTests {
+    @Test func letGoKeepsOnlyQuoteFreeLinesWithoutAnchors() {
+        var n = ReleaseNote()
+        n.version = 3
+        n.affirmations = [
+            WrittenAffirmation(text: "You wanted to be fair to him, and you stopped to think it through.", basis: "Values.", anchors: ["[synthetic] a line"]),
+            WrittenAffirmation(text: "You wrote \u{201C}[synthetic] a line\u{201D} and meant it.", basis: "Values.", anchors: ["[synthetic] a line"]),
+        ]
+        let s = n.summary
+        #expect(s.affirmations?.count == 1)
+        #expect(s.affirmations?.first?.anchors.isEmpty == true)
+        #expect(HonestAffirmations.shown(s).count == 1)
+    }
+
+    @Test func letGoWithoutWrittenLinesShowsNoTemplates() {
+        var n = ReleaseNote()
+        n.feelings = [.ashamed]
+        n.intensity = .strong
+        #expect(HonestAffirmations.shown(n.summary).isEmpty)
+    }
+
+    @Test func noQuotesPromptSaysSo() {
+        #expect(HonestAffirmations.prompt(sentences: ["[synthetic] A line."], labels: [0: .want], note: ReleaseNote(), noQuotes: true)
+            .contains("Do not quote her"))
     }
 }

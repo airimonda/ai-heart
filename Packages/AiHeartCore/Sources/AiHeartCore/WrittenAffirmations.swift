@@ -47,7 +47,7 @@ extension HonestAffirmations {
 
     /// Her numbered sentences (with the part each was sorted into), the feelings and the needs.
     /// Sentences about self-harm or hopelessness are left out of the prompt but keep their numbers.
-    public static func prompt(sentences: [String], labels: [Int: NotePart], note: ReleaseNote) -> String {
+    public static func prompt(sentences: [String], labels: [Int: NotePart], note: ReleaseNote, noQuotes: Bool = false) -> String {
         let rows = sentences.prefix(maxPromptSentences).enumerated().compactMap { i, s -> String? in
             guard usable(s) else { return nil }
             let part = labels[i].map { " [\($0.rawValue)]" } ?? ""
@@ -71,7 +71,7 @@ extension HonestAffirmations {
         strengths (noticing what she already does), labelling (putting feelings into words). \
         Rules: say only what her sentences support. No praise of who she is ("you are strong"). No promises or predictions \
         ("it will be okay"). No "don't worry", no advice, no "you should" or "try to", no orders. No diagnoses. \
-        Do not say "I" or "me". If you quote her, copy her exact words in double quotes. \
+        Do not say "I" or "me". \(noQuotes ? "Do not quote her at all: she let this entry go, so say it in your own plain words, without quotation marks." : "If you quote her, copy her exact words in double quotes.") \
         If nothing fits honestly, answer: none
         One line per answer, in exactly this form (sentence numbers from the list above):
         LINE: You wanted to be there for her, and you went. | SENTENCES: 2,5 | APPROACH: values | BASIS: Both sentences show a value of yours acted on.
@@ -216,6 +216,8 @@ extension HonestAffirmations {
         if let written = note.affirmations, !written.isEmpty {
             return written.prefix(maxShown).map { Affirmation(text: $0.text, basis: $0.basis) }
         }
+        // A let-go note keeps too little for a template to say anything specific (owner, 2026-11-05: flat).
+        if note.summaryOnly == true { return [] }
         return from(note)
     }
 

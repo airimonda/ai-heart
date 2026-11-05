@@ -87,11 +87,11 @@ enum AutoDecide {
 enum ReleaseNoteWriter {
     static func make(for entry: Entry, keptLines: [String], context: ModelContext) async -> ReleaseNote? {
         guard let text = entry.text else { return nil }
-        return await make(text: text, keptLines: keptLines, sensations: entry.sensations, context: context)
+        return await make(text: text, keptLines: keptLines, sensations: entry.sensations, letGo: entry.status != .kept, context: context)
     }
 
     /// From plain text, e.g. a Listen session before it is saved.
-    static func make(text: String, keptLines: [String], sensations: [String] = [], context: ModelContext) async -> ReleaseNote? {
+    static func make(text: String, keptLines: [String], sensations: [String] = [], letGo: Bool = false, context: ModelContext) async -> ReleaseNote? {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
         let quiet = WordFinder.quietTopics(context)
         let rules = ReleaseNotes.fallback(text: text, keptLines: keptLines, sensations: sensations, quietTopics: quiet)
@@ -141,7 +141,7 @@ enum ReleaseNoteWriter {
         // Honest affirmations (owner, 2026-11-05): one more call, checked line by line. Not for heavy, hopeless or
         // self-harm entries; the fixed templates show when nothing is stored.
         if !labels.isEmpty, HonestAffirmations.mayWrite(for: text) {
-            let raw = await ask(HonestAffirmations.prompt(sentences: sentences, labels: labels, note: note), 220, system: HonestAffirmations.system)
+            let raw = await ask(HonestAffirmations.prompt(sentences: sentences, labels: labels, note: note, noQuotes: letGo), 220, system: HonestAffirmations.system)
             let written = HonestAffirmations.parseWritten(raw, sentences: sentences, text: text, quietTopics: quiet)
             note.affirmations = written.isEmpty ? nil : written
             NSLog("AiHeartLLM affirmations: kept=%d", written.count)
@@ -196,7 +196,7 @@ struct LiveNotes: View {
     var body: some View {
         if let note = entry.releaseNote, !pending.ids.contains(entry.syncId) {
             ReleaseNoteCard(note: note, moodPoint: entry.moodGuessed ? nil : ReleaseNotes.moodPointLine(valence: entry.valence, arousal: entry.arousal))
-            if entry.status == .kept, entry.text?.isEmpty == false {
+            if entry.status == .kept || entry.status == .resting, entry.text?.isEmpty == false {
                 // Notes can be off; she can ask for them again (older ones were written a cruder way).
                 Button { ReleaseNoteWriter.writeForKept(entry, context: context, again: true) } label: {
                     Label("Write these notes again", systemImage: "arrow.clockwise").frame(maxWidth: .infinity, minHeight: 44)

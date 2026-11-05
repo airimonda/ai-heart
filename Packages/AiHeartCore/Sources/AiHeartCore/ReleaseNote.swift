@@ -245,7 +245,13 @@ public struct ReleaseNote: Codable, Equatable, Sendable {
         n.partSummaries = nil
         n.keyLines = nil
         n.talkNotes = nil
-        n.affirmations = nil
+        // Written affirmations survive only without her words: no quotes, no anchors (owner, 2026-11-05).
+        n.affirmations = affirmations?.compactMap { a in
+            let quoteMarks = CharacterSet(charactersIn: "\"\u{201C}\u{201D}\u{300C}\u{300D}")
+            guard a.text.rangeOfCharacter(from: quoteMarks) == nil, a.basis.rangeOfCharacter(from: quoteMarks) == nil else { return nil }
+            return WrittenAffirmation(text: a.text, basis: a.basis, anchors: [])
+        }
+        if n.affirmations?.isEmpty == true { n.affirmations = nil }
         n.summaryOnly = true
         return n
     }
