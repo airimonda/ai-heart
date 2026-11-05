@@ -197,6 +197,7 @@ struct LiveNotes: View {
     var body: some View {
         if let note = entry.releaseNote, !pending.ids.contains(entry.syncId) {
             ReleaseNoteCard(note: note, moodPoint: entry.moodGuessed ? nil : ReleaseNotes.moodPointLine(valence: entry.valence, arousal: entry.arousal))
+                .id(entry.releaseNoteJSON)
             if entry.status == .kept || entry.status == .resting, entry.text?.isEmpty == false {
                 // Notes can be off; she can ask for them again (older ones were written a cruder way).
                 Button { ReleaseNoteWriter.writeForKept(entry, context: context, again: true) } label: {
@@ -789,7 +790,9 @@ struct RestingEntryView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text(header).font(.subheadline).foregroundStyle(Palette.muted)
                 if let note = entry.releaseNote {
+                    // Keyed on the stored JSON so the card redraws as soon as rewritten notes are saved.
                     ReleaseNoteCard(note: note, moodPoint: ReleaseNotes.moodPointLine(valence: entry.valence, arousal: entry.arousal))
+                        .id(entry.releaseNoteJSON)
                     if entry.text?.isEmpty == false {
                         // While it rests the text is still here, so the notes can be written again (owner, 2026-11-05).
                         Button {

@@ -135,6 +135,11 @@ extension HonestAffirmations {
         return cited.allSatisfy(usable) ? cited : nil
     }
 
+    /// Claims about her mind, causes or verdicts the model cannot know (narrower than Listen's list).
+    static let mindReading = ["you must be", "you are probably", "you're probably", "a sign of", "that's a sign", "this is a sign",
+                              "caused by", "the reason you", "you are clearly", "you're clearly", "you deserve", "not your fault",
+                              "you did nothing wrong", "they were wrong", "he was wrong", "she was wrong", "deep down", "really means"]
+
     static let traitWords = ["strong", "brave", "resilient", "amazing", "incredible", "wonderful", "awesome", "courageous", "fearless",
                              "inspiring", "special", "worthy", "enough", "lovable", "loved", "capable", "a survivor", "a fighter",
                              "a warrior", "a good", "a great", "a bad", "a kind", "a caring", "a wonderful", "such a"]
@@ -179,7 +184,10 @@ extension HonestAffirmations {
         if SafetyCheck.mentionsSelfHarm(t) || KeepOrRelease.readsHopeless(t) { return "self-harm or hopeless" }
         // Fixed output rules (labels, quiet topics, numbers), then the Listen word lists for advice,
         // reassurance, persona, special meaning and interpretation.
-        if let why = ListenRules.rejection(t, transcript: text, quietTopics: quietTopics) { return why }
+        // Reflective mode: a line that CONNECTS two things she wrote needs "because you" or "it's human to"
+        // (common humanity is self-compassion). Readings of her mind or causes are still refused below.
+        if let why = ListenRules.rejection(t, transcript: text, quietTopics: quietTopics, reflective: true) { return why }
+        if ListenRules.matches(mindReading, in: t.lowercased()) { return "interpretation" }
         // Her own quoted words are not the app speaking: the style rails look at the rest.
         let own = quoted(t).reduce(ListenRules.normalised(t)) { $0.replacingOccurrences(of: ListenRules.normalised($1), with: " ") }
         for rail: (String, [String]) in [("promise", promiseTerms), ("dismissing", dismissTerms), ("advice", adviceExtra)] {

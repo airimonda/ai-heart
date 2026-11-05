@@ -214,3 +214,14 @@ import Testing
             .contains("Do not quote her"))
     }
 }
+
+@Suite struct AffirmationReflectiveTests {
+    let text = "[synthetic] I don't want to hurt him. It feels heavy tonight. I want to change."
+    @Test func connectingLineWithBecausePasses() {
+        #expect(HonestAffirmations.writtenRejection("It feels heavy tonight because you care about not hurting him.", text: text) == nil)
+    }
+    @Test func mindReadingStillRejected() {
+        #expect(HonestAffirmations.writtenRejection("Deep down you are probably scared of losing him.", text: text) != nil)
+        #expect(HonestAffirmations.writtenRejection("This heaviness is a sign of how much you care.", text: text) == "interpretation")
+    }
+}
