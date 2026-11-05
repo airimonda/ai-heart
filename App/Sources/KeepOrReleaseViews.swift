@@ -144,7 +144,8 @@ enum ReleaseNoteWriter {
             let raw = await ask(HonestAffirmations.prompt(sentences: sentences, labels: labels, note: note, noQuotes: letGo), 220, system: HonestAffirmations.system)
             let written = HonestAffirmations.parseWritten(raw, sentences: sentences, text: text, quietTopics: quiet)
             note.affirmations = written.isEmpty ? nil : written
-            NSLog("AiHeartLLM affirmations: kept=%d", written.count)
+            NSLog("AiHeartLLM affirmations: model=%@ rawLines=%d kept=%d letGo=%d", model.name,
+                  raw.split(whereSeparator: \.isNewline).count, written.count, letGo ? 1 : 0)
         }
         // Labels are the core; without them fall back to the rule notes.
         return labels.isEmpty ? (rules.isEmpty ? nil : rules) : note

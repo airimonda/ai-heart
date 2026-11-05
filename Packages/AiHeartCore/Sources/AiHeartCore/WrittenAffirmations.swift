@@ -103,12 +103,20 @@ extension HonestAffirmations {
             guard ["LINE", "SENTENCES", "APPROACH", "BASIS"].contains(key), fields[key] == nil else { continue }
             fields[key] = parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        guard let line = fields["LINE"], let cites = fields["SENTENCES"], let approachKey = fields["APPROACH"], let why = fields["BASIS"],
-              let approach = AffirmationApproach(rawValue: approachKey.lowercased().trimmingCharacters(in: .punctuationCharacters.union(.whitespaces))),
-              let anchors = citedSentences(cites, sentences: sentences) else { return nil }
+        func reject(_ reason: String) -> WrittenAffirmation? {
+            // Reason only, never the line: the log must not hold her words.
+            NSLog("AiHeartLLM affirmation rejected: %@", reason); return nil
+        }
+        guard let line = fields["LINE"], let cites = fields["SENTENCES"], let approachKey = fields["APPROACH"], let why = fields["BASIS"] else {
+            return row.trimmingCharacters(in: .whitespaces).isEmpty ? nil : reject("format (fields: \(fields.keys.sorted().joined(separator: ",")))")
+        }
+        guard let approach = AffirmationApproach(rawValue: approachKey.lowercased().trimmingCharacters(in: .punctuationCharacters.union(.whitespaces))) else {
+            return reject("approach")
+        }
+        guard let anchors = citedSentences(cites, sentences: sentences) else { return reject("sentences") }
         let clean = line.trimmingCharacters(in: CharacterSet(charactersIn: " \"'\u{201C}\u{201D}"))
-        guard writtenRejection(clean, text: text, quietTopics: quietTopics) == nil,
-              basisRejection(why, text: text, quietTopics: quietTopics) == nil else { return nil }
+        if let r = writtenRejection(clean, text: text, quietTopics: quietTopics) { return reject("line: \(r)") }
+        if let r = basisRejection(why, text: text, quietTopics: quietTopics) { return reject("basis: \(r)") }
         return WrittenAffirmation(text: clean, basis: approach.caption + " " + why.trimmingCharacters(in: .whitespaces), anchors: anchors)
     }
 
