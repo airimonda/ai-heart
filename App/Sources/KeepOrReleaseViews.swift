@@ -789,6 +789,21 @@ struct RestingEntryView: View {
                 Text(header).font(.subheadline).foregroundStyle(Palette.muted)
                 if let note = entry.releaseNote {
                     ReleaseNoteCard(note: note, moodPoint: ReleaseNotes.moodPointLine(valence: entry.valence, arousal: entry.arousal))
+                    if entry.text?.isEmpty == false {
+                        // While it rests the text is still here, so the notes can be written again (owner, 2026-11-05).
+                        Button {
+                            writing = true
+                            Task {
+                                let note = await ReleaseNoteWriter.make(for: entry, keptLines: entry.keptLines, context: context)
+                                if entry.status == .resting, let note { entry.releaseNote = note; entry.updatedAt = .now; try? context.save() }
+                                writing = false
+                            }
+                        } label: {
+                            Label(writing ? "Writing notes…" : "Write these notes again", systemImage: "arrow.clockwise")
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                        }
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(Palette.onTint).disabled(writing)
+                    }
                 } else if entry.text?.isEmpty == false {
                     Button {
                         writing = true
