@@ -16,6 +16,12 @@ I built it for myself, as a data scientist who wanted to see how my body and my 
 
 *Screenshots use the app's built-in sample data.*
 
+**Demo video (2 min, sample data):** journal, the month calendar, insights, the mood outlook, the mood map, and Talk it through.
+
+<a href="docs/demo.mp4"><img src="docs/screenshots/demo-poster.png" width="200" alt="Play the demo video"></a>
+
+The Talk it through part is a scripted demo with made-up words, labeled as such on screen; the on-device model is too slow to run in the iOS Simulator. The video is recorded by a UI test, so it can be re-made for each release: `scripts/record-demo.sh <simulator-udid>`.
+
 ## What it does
 
 **Capture, in a few taps**

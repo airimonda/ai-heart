@@ -149,6 +149,7 @@ struct NowView: View {
         .onAppear {
             let args = ProcessInfo.processInfo.arguments
             if args.contains("-openBody") { path = NavigationPath([NowRoute.body]) }
+            if args.contains("-openTalk") { DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { showTalk = true } }
             if args.contains("-openListen") { DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { showListen = true } }
             if args.contains("-openFeeling") { path = NavigationPath([NowRoute.feeling("Wired")]) }
             if args.contains("-openRules") { path = NavigationPath([NowRoute.rules]) }

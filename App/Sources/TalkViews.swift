@@ -353,10 +353,44 @@ struct TalkView: View {
 
     // MARK: Flow
 
+    #if DEBUG
+    /// Demo recordings only (`-talkDemo`, scripts/record-demo.sh): plays a scripted, synthetic conversation
+    /// without loading any model, so the screen can be shown on the simulator. Labeled as scripted on screen.
+    /// The replies follow the same rules as real ones: reflective questions, no advice, no reassurance.
+    private func playDemo() async {
+        items.append(TalkItem(kind: .notice, text: "Scripted demo with sample words. No model is running."))
+        let script: [(TalkItem.Kind, String)] = [
+            (.her, "Work was a lot today. My plan for the launch got pushed back again."),
+            (.app, "Your plan got pushed back again. What was the hardest part of hearing that?"),
+            (.her, "I'd stayed late all week for it. It felt like nobody noticed."),
+            (.app, "You stayed late all week, and it felt like nobody noticed. What do you feel most when you think about it now?"),
+            (.her, "Mostly tired. And a bit let down."),
+            (.app, "Tired, and a bit let down. What would you want someone to know about this week?"),
+            (.her, "That I tried, even if it didn't show."),
+            (.app, "You tried, even if it didn't show. Is there anything else you want to say about it before we stop?"),
+        ]
+        for (kind, text) in script {
+            if kind == .her {
+                try? await Task.sleep(for: .seconds(2.2))
+                items.append(TalkItem(kind: .her, text: text))
+                herCount += 1
+            } else {
+                sending = true
+                try? await Task.sleep(for: .seconds(1.6))
+                sending = false
+                items.append(TalkItem(kind: .app, text: text))
+            }
+        }
+    }
+    #endif
+
     private func start() async {
         guard !seeded else { return }
         seeded = true
         startedAt = Date()
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-talkDemo") { await playDemo(); return }
+        #endif
         let llm = LLMService.shared
         if llm.state != .ready { await llm.prepare() }
         guard llm.state == .ready else { noModel = true; return }
