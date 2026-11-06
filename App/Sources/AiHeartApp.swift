@@ -119,6 +119,22 @@ struct RootView: View {
             }
             if ProcessInfo.processInfo.arguments.contains("-openJournal") { tab = .journal }
             if ProcessInfo.processInfo.arguments.contains("-openInsights") { tab = .insights }
+            // Demo recordings: a sample safety plan (synthetic words), opened read-only.
+            if ProcessInfo.processInfo.arguments.contains("-openSafety") {
+                if let s = try? context.fetch(FetchDescriptor<AppSettings>()).first {
+                    let sample: [SafetyPlan.Step: String] = [
+                        .signs: "[Sample] Not sleeping. Skipping meals. Thinking nobody would notice if I stopped answering.",
+                        .coping: "[Sample] A hot shower. A slow walk around the block. My calm playlist.",
+                        .places: "[Sample] The café near work. Calling my sister just to talk.",
+                        .helpers: "[Sample] My sister. My best friend from college.",
+                        .pros: "[Sample] My therapist, weekdays 9 to 5.",
+                        .safeSpace: "[Sample] Give the spare medication to my sister to keep.",
+                    ]
+                    for (step, text) in sample where step.text(in: s).isEmpty { step.set(text, in: s) }
+                    try? context.save()
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { router.openSafetyPlan = true }
+            }
             if ProcessInfo.processInfo.arguments.contains("-rateLatest") {
                 let all = (try? context.fetch(FetchDescriptor<Workout>(sortBy: [SortDescriptor(\.start, order: .reverse)]))) ?? []
                 workouts.pendingRating = all.first { !$0.isRated }?.syncId

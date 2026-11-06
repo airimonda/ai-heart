@@ -255,6 +255,15 @@ enum DemoData {
         context.insert(resting)
         try? EntryLifecycle.letGo(resting, restDays: 7, keptLines: ["A bath helped.", "I needed to stop early."], by: .auto)
         resting.releaseNote = ReleaseNotes.fallback(text: resting.text ?? "", keptLines: resting.keptLines)
+        // Sample "honest things to hold", as the model writes them: each rests on her own sentence (docs/16).
+        resting.releaseNote?.affirmations = [
+            WrittenAffirmation(text: "You noticed you needed to stop early, and you listened to that.",
+                               basis: AffirmationApproach.strengths.caption + " You wrote: I needed to stop early.",
+                               anchors: ["I needed to stop early."]),
+            WrittenAffirmation(text: "On an awful day, you still found something that helped.",
+                               basis: AffirmationApproach.compassion.caption + " You wrote: A bath helped.",
+                               anchors: ["A bath helped."]),
+        ]
 
         let gone = Entry(kind: .write, createdAt: cal.date(byAdding: .day, value: -9, to: .now)!, timeZone: tz)
         gone.deviceId = tag
