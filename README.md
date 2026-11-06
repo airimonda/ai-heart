@@ -32,7 +32,9 @@ I built it for myself, as a data scientist who wanted to see how my body and my 
 **A journal that colors itself**
 - Each entry takes a color from where it sits on a pleasant/unpleasant and still/stirred plane. The calendar glows brighter on good days.
 - Entries without a feeling get a tone guess from the language model (on the phone, or the cloud model if switched on), used only for color.
-- Keep or release: hard entries can be let go, keeping only a short summary (what happened, feelings, how strong, what was needed). Deleted entries wait 30 days in Recently deleted. Entries about self-harm are always kept and open a safety page.
+- Moment notes: each entry gets a short note laid out like a session note: what happened in one neutral line, a summary line per part (trigger, thought, feeling, body, what I did), feelings and needs picked from fixed lists, each backed by my own words.
+- Honest affirmations: one or two short lines written by the language model that connect things I actually wrote. Every line must cite my sentences and name one research-backed approach (self-affirmation, self-compassion, strengths, affect labelling); a line that fails the checks is dropped, and fixed templates are the fallback.
+- Keep or release: hard entries can be let go, keeping only a summary note (what happened, feelings, how strong, what was needed) and never my exact lines. While an entry rests, its notes can be written again. Deleted entries wait 30 days in Recently deleted. Entries about self-harm are always kept and open a safety page.
 
 **Listen**
 - When words won't come: talk or type, and it mostly listens. Speech is transcribed on the phone. No persona, no advice, no memory between sessions.
@@ -70,7 +72,7 @@ I built it for myself, as a data scientist who wanted to see how my body and my 
 ## How it is built
 
 - SwiftUI, SwiftData, Swift Charts, HealthKit, Vision, Speech, App Intents, iOS 26+.
-- `Packages/AiHeartCore`: models, statistics, the outlook, parsers, export and backup, with about 280 unit tests on synthetic data.
+- `Packages/AiHeartCore`: models, statistics, the outlook, parsers, export and backup, with about 500 unit tests on synthetic data.
 - `App/`: the iPhone app.
 - `docs/`: the product spec, data model, analytics, privacy rules and the research behind the design. `CLAUDE.md` holds the non-negotiable rules the app was built against.
 - Built milestone by milestone with Claude Code.
